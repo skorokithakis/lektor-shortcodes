@@ -6,14 +6,15 @@ import scodes
 
 
 def shortcode_factory(config):
-    for item, conf in config.section_as_dict("shortcodes").items():
-        @scodes.register(item)
-        def handler(context, content, pargs, kwargs):
-            return Template(conf).render(kwargs)
-
     def shortcodes(text, **options):
-        parser = scodes.Parser()
+        section = options.get("section", "main")
 
+        for item, conf in config.section_as_dict(section).items():
+            @scodes.register(item)
+            def handler(context, content, pargs, kwargs):
+                return Template(conf).render(kwargs)
+
+        parser = scodes.Parser()
         if isinstance(text, Markdown):
             text.source = parser.parse(text.source)
         else:
