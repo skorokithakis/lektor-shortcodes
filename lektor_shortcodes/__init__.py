@@ -11,12 +11,15 @@ def shortcode_factory(config):
     def shortcodes(text, **options):
         section = options.get("section", "main")
 
-        for item, conf in config.section_as_dict(section).items():
-            @scodes.register(item)
-            def handler(context, content, pargs, kwargs):
-                return Template(conf).render(kwargs)
-
         parser = scodes.Parser()
+        for item, conf in config.section_as_dict(section).items():
+            # Make a closure so the correct config object passes through.
+            def handler_closure(cconf):
+                def handler(context, content, pargs, kwargs):
+                    return Template(cconf).render(kwargs)
+                return handler
+            parser.register(handler_closure(conf), item)
+
         if isinstance(text, Markdown):
             text.source = parser.parse(text.source)
         elif isinstance(text, Markup):
