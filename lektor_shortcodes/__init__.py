@@ -2,6 +2,8 @@
 from jinja2 import Template
 from lektor.pluginsystem import Plugin
 from lektor.markdown import Markdown
+from markupsafe import Markup
+
 import scodes
 
 
@@ -17,8 +19,10 @@ def shortcode_factory(config):
         parser = scodes.Parser()
         if isinstance(text, Markdown):
             text.source = parser.parse(text.source)
+        elif isinstance(text, Markup):
+            text = Markup(parser.parse(text))
         else:
-            text = parser.parse(text.source)
+            text = parser.parse(text)
         return text
     return shortcodes
 
