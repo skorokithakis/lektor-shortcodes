@@ -4,7 +4,7 @@ from lektor.pluginsystem import Plugin
 from lektor.markdown import Markdown
 from markupsafe import Markup
 
-import scodes
+from . import scodes
 
 
 def shortcode_factory(config):
