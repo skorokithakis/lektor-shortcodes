@@ -34,9 +34,12 @@ def register(tag, end_tag=None):
 
 
 # Decode unicode escape sequences in a string.
-def decode_escapes(s):
-    return bytes(s).decode('unicode_escape')
-
+if sys.version_info < (3,):
+    def decode_escapes(s):
+        return bytes(s).decode('unicode_escape')
+else:
+    def decode_escapes(s):
+        return s.encode('latin-1').decode('unicode_escape')
 
 # --------------------------------------------------------------------------
 # Exception classes.
