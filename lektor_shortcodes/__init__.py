@@ -66,7 +66,10 @@ class ShortcodesPlugin(Plugin):
     description = u'Shortcodes for Lektor.'
 
     def on_markdown_config(self, config):
-        lexer = ShortcodeLexer(self.get_config())
+        shortcodes_config = self.get_config()
+        if not shortcodes_config.section_as_dict('global'):
+            return
+        lexer = ShortcodeLexer(shortcodes_config)
         config.options['block'] = lexer
 
     def on_setup_env(self, **extra):
