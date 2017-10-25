@@ -53,7 +53,7 @@ to be on one line.
 For instance, for the example above, the config file could be:
 
 ~~~ini
-[main]
+[global]
 image = '<div class="align{{ align }}">{% if link %}<a href="{{ link }}"{% if not link.startswith("http") %} data-lightbox="gallery"{% endif %}>{% endif %}<img src="{{ image }}">{% if link %}</a>{% endif %}{% if caption %}<span class="caption">{{ caption }}</span>{% endif %}</div>'
 ~~~
 
@@ -71,22 +71,22 @@ This will allow you to use shortcodes with optional arguments, like so:
 [% image align=right link=http://www.example.com image=hello.jpg caption="Hello!" %]
 ~~~
 
-To actually make the above work, you need to use the `shortcode` filter in your
-template. For example, if the field is called `body`, in your html template
-that you reference the `body` field you'd add:
+Shortcodes defined within the section named `global` will be processed
+automatically inside any of your site’s Markdown content. It is also possible to
+define shortcodes which are only expanded when the Jinja2 template for a page
+explicitly requests it. Shortcodes defined in any section not named `global`
+will only be applied when the template passed the content through a Jinja2
+filter named `shortcode`. For example, if your HTML template references a field
+called `body`, you may request expanding shortcodes defined within the
+`body-only` section of your config file, like so:
 
 ~~~
-{{ body|shortcodes }}
+{{ body|shortcodes(section="body-only") }}
 ~~~
 
-This will use the default section, `main`. If you want, you can specify the
-section too:
-
-~~~
-{{ body|shortcodes(section="post-codes") }}
-~~~
-
-And this would look for a section called `post-codes` in the ini file.
+This will enable all shortcodes from the specified section, in addition to all
+globally defined shortcodes. If no section is specified, the filter defaults to
+the section named `main`.
 
 
 Miscellanea
