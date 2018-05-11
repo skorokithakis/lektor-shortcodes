@@ -6,6 +6,7 @@ setup(
     author=u'Stavros Korokithakis,,,',
     author_email='hi@stavros.io',
     url='https://github.com/skorokithakis/lektor-shortcodes',
+    description=open("README.md").read(),
     license='MIT',
     packages=['lektor_shortcodes'],
     keywords="lektor shortcodes",
