@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='lektor-shortcodes',
-    version='0.2.0',
+    version='0.2.1',
     author=u'Stavros Korokithakis,,,',
     author_email='hi@stavros.io',
     url='https://github.com/skorokithakis/lektor-shortcodes',
