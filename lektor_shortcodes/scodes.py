@@ -8,7 +8,6 @@
 import re
 import sys
 
-
 # Library version number.
 __version__ = "2.4.0"
 
@@ -25,7 +24,7 @@ globalends = []
 def register(tag, end_tag=None):
 
     def register_function(function):
-        globaltags[tag] = {'func': function, 'endtag': end_tag}
+        globaltags[tag] = {"func": function, "endtag": end_tag}
         if end_tag:
             globalends.append(end_tag)
         return function
@@ -35,11 +34,16 @@ def register(tag, end_tag=None):
 
 # Decode unicode escape sequences in a string.
 if sys.version_info < (3,):
+
     def decode_escapes(s):
-        return bytes(s).decode('unicode_escape')
+        return bytes(s).decode("unicode_escape")
+
+
 else:
+
     def decode_escapes(s):
-        return s.encode('latin-1').decode('unicode_escape')
+        return s.encode("latin-1").decode("unicode_escape")
+
 
 # --------------------------------------------------------------------------
 # Exception classes.
@@ -78,7 +82,7 @@ class Node:
         self.children = []
 
     def render(self, context):
-        return ''.join(child.render(context) for child in self.children)
+        return "".join(child.render(context) for child in self.children)
 
 
 # A Text node represents plain text located between shortcode tokens.
@@ -97,7 +101,8 @@ class Text(Node):
 class Shortcode(Node):
 
     # Regex for parsing the shortcode's arguments.
-    re_args = re.compile(r"""
+    re_args = re.compile(
+        r"""
         (?:([^\s'"=]+)=)?
         (
             "((?:[^\\"]|\\.)*)"
@@ -108,7 +113,9 @@ class Shortcode(Node):
         ([^\s'"=]+)=(\S+)
         |
         (\S+)
-    """, re.VERBOSE)
+    """,
+        re.VERBOSE,
+    )
 
     def __init__(self, tag, argstring, func):
         self.tag = tag
@@ -154,7 +161,7 @@ class BlockShortcode(Shortcode):
     # in a RenderingError. The original exception will still be available via
     # the RenderingError's __cause__ attribute.
     def render(self, context):
-        content = ''.join(child.render(context) for child in self.children)
+        content = "".join(child.render(context) for child in self.children)
         try:
             return str(self.func(context, content, self.pargs, self.kwargs))
         except Exception as ex:
@@ -173,22 +180,18 @@ class BlockShortcode(Shortcode):
 # each shortcode's handler function.
 class Parser:
 
-    def __init__(self, start='[%', end='%]', esc='\\'):
+    def __init__(self, start="[%", end="%]", esc="\\"):
         self.start = start
         self.esc_start = esc + start
         self.len_start = len(start)
         self.len_end = len(end)
         self.len_esc = len(esc)
-        self.regex = re.compile(r'((?:%s)?%s.*?%s)' % (
-            re.escape(esc),
-            re.escape(start),
-            re.escape(end),
-        ))
+        self.regex = re.compile(r"((?:%s)?%s.*?%s)" % (re.escape(esc), re.escape(start), re.escape(end)))
         self.tags = {}
         self.ends = []
 
     def register(self, func, tag, end_tag=None):
-        self.tags[tag] = {'func': func, 'endtag': end_tag}
+        self.tags[tag] = {"func": func, "endtag": end_tag}
         if end_tag:
             self.ends.append(end_tag)
 
@@ -222,13 +225,13 @@ class Parser:
 
         # Do we have a shortcode token?
         if token.startswith(self.start):
-            content = token[self.len_start:-self.len_end].strip()
+            content = token[self.len_start : -self.len_end].strip()
             if content:
                 self._parse_sc_token(content, stack, expecting, tags, ends)
 
         # Do we have an escaped shortcode token?
         elif token.startswith(self.esc_start):
-            stack[-1].children.append(Text(token[self.len_esc:]))
+            stack[-1].children.append(Text(token[self.len_esc :]))
 
         # We must have a text token.
         else:
@@ -238,7 +241,7 @@ class Parser:
 
         # Split the token's content into the tag and argument string.
         tag = content.split(None, 1)[0]
-        argstring = content[len(tag):]
+        argstring = content[len(tag) :]
 
         # Do we have a registered end-tag?
         if tag in ends:
@@ -253,13 +256,13 @@ class Parser:
 
         # Do we have a registered tag?
         elif tag in tags:
-            if tags[tag]['endtag']:
-                node = BlockShortcode(tag, argstring, tags[tag]['func'])
+            if tags[tag]["endtag"]:
+                node = BlockShortcode(tag, argstring, tags[tag]["func"])
                 stack[-1].children.append(node)
                 stack.append(node)
-                expecting.append(tags[tag]['endtag'])
+                expecting.append(tags[tag]["endtag"])
             else:
-                node = AtomicShortcode(tag, argstring, tags[tag]['func'])
+                node = AtomicShortcode(tag, argstring, tags[tag]["func"])
                 stack[-1].children.append(node)
 
         # We have an unrecognised tag.
