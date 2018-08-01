@@ -2,7 +2,7 @@
 import itertools
 import re
 
-from jinja2 import Template
+from jinja2 import Template, Environment
 from markupsafe import Markup
 from mistune import BlockLexer
 
@@ -13,24 +13,26 @@ from . import scodes
 
 
 class ShortcodeLexer(BlockLexer):
-    def __init__(self, config):
+    def __init__(self, config, *, env=None):
         BlockLexer.__init__(self)
-        self._init_shortcodes_compiler(config)
+        if env is None:
+            env = Environment
+        self._init_shortcodes_compiler(config, env)
         self._init_shortcodes_lexer()
 
     def _init_shortcodes_lexer(self):
         self.rules.shortcode = re.compile(r"(\[% .+? %\])")
         self.default_rules.insert(1, "shortcode")
 
-    def _init_shortcodes_compiler(self, config):
-        self.compile = shortcode_factory(config)
+    def _init_shortcodes_compiler(self, config, env):
+        self.compile = shortcode_factory(config, env=env)
 
     def parse_shortcode(self, match):
         text = match.group(1)
-        self.tokens.append({"type": "close_html", "text": self.compile(text)})
+        self.tokens.append({"type": "close_html", "text": self.compile(text, context=self._current_context)})
 
 
-def shortcode_factory(ctx, config):
+def shortcode_factory(config, *, ctx=None, env=None):
     """
     Return a new shortcode factory.
 
@@ -38,7 +40,16 @@ def shortcode_factory(ctx, config):
     is the configuration from the config ini file.
     """
 
-    def shortcodes(text, **options):
+    if ctx is None:
+        ctx = {}
+
+    def shortcodes(text, *, context=None, **options):
+        if context is not None:
+            ctx.update(context)
+        if env is None:
+            template = Template
+        else:
+            template = env.from_string
         sections = ("global", options.get("section", "main"))
         shortcodes = itertools.chain(*(config.section_as_dict(section).items() for section in sections))
 
@@ -48,7 +59,7 @@ def shortcode_factory(ctx, config):
             def handler_closure(cconf):
                 def handler(context, content, pargs, kwargs):
                     kwargs.update(ctx)
-                    return Template(cconf).render(kwargs)
+                    return template(cconf).render(kwargs)
 
                 return handler
 
@@ -71,11 +82,16 @@ class ShortcodesPlugin(Plugin):
 
     def on_process_template_context(self, context, **extra):
         if "shortcodes" not in self.env.jinja_env.filters:
-            self.env.jinja_env.filters["shortcodes"] = shortcode_factory(context, self.get_config())
+            self.env.jinja_env.filters["shortcodes"] = shortcode_factory(
+                self.get_config(), ctx=context, env=self.env.jinja_env
+            )
 
     def on_markdown_config(self, config):
         shortcodes_config = self.get_config()
         if not shortcodes_config.section_as_dict("global"):
             return
-        lexer = ShortcodeLexer(shortcodes_config)
-        config.options["block"] = lexer
+        self.lexer = ShortcodeLexer(shortcodes_config, env=self.env.jinja_env)
+        config.options["block"] = self.lexer
+
+    def on_markdown_meta_init(self, meta, **extra):
+        self.lexer._current_context = {"this": extra["record"], "site": extra["record"].pad}
