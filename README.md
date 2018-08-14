@@ -86,7 +86,9 @@ expanding shortcodes defined within the `special` section like so:
 
 This will enable all shortcodes from the specified section, in addition to all
 globally defined shortcodes. If no section is specified, the filter defaults to
-the section named `main`.
+the section named `main` (so it will include shortcodes in `main` unless you
+request a different section, and it will always include shortcodes in `global` no
+matter what).
 
 
 Miscellanea
