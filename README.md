@@ -77,11 +77,11 @@ define shortcodes which are only expanded when the Jinja2 template for a page
 explicitly requests it. Shortcodes defined in any section not named `global`
 will only be applied when the template passed the content through a Jinja2
 filter named `shortcode`. For example, if your HTML template references a field
-called `body`, you may request expanding shortcodes defined within the
-`body-only` section of your config file, like so:
+called `body`, and your config has a section called `[special]`, you may request
+expanding shortcodes defined within the `special` section like so:
 
 ~~~
-{{ body|shortcodes(section="body-only") }}
+{{ body|shortcodes(section="special") }}
 ~~~
 
 This will enable all shortcodes from the specified section, in addition to all
