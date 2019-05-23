@@ -86,7 +86,7 @@ class ShortcodesPlugin(Plugin):
                 self.get_config(), ctx=context, env=self.env.jinja_env
             )
 
-    def on_markdown_config(self, config):
+    def on_markdown_config(self, config, **extra):
         shortcodes_config = self.get_config()
         if not shortcodes_config.section_as_dict("global"):
             return
