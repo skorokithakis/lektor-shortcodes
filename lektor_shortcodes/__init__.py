@@ -2,12 +2,12 @@
 import itertools
 import re
 
-from jinja2 import Template, Environment
-from markupsafe import Markup
-from mistune import BlockLexer
-
+from jinja2 import Environment
+from jinja2 import Template
 from lektor.markdown import Markdown
 from lektor.pluginsystem import Plugin
+from markupsafe import Markup
+from mistune import BlockLexer
 
 from . import scodes
 
@@ -29,7 +29,12 @@ class ShortcodeLexer(BlockLexer):
 
     def parse_shortcode(self, match):
         text = match.group(1)
-        self.tokens.append({"type": "close_html", "text": self.compile(text, context=self._current_context)})
+        self.tokens.append(
+            {
+                "type": "close_html",
+                "text": self.compile(text, context=self._current_context),
+            }
+        )
 
 
 def shortcode_factory(config, *, ctx=None, env=None):
@@ -51,7 +56,9 @@ def shortcode_factory(config, *, ctx=None, env=None):
         else:
             template = env.from_string
         sections = ("global", options.get("section", "main"))
-        shortcodes = itertools.chain(*(config.section_as_dict(section).items() for section in sections))
+        shortcodes = itertools.chain(
+            *(config.section_as_dict(section).items() for section in sections)
+        )
 
         parser = scodes.Parser()
         for item, conf in shortcodes:
@@ -77,8 +84,8 @@ def shortcode_factory(config, *, ctx=None, env=None):
 
 
 class ShortcodesPlugin(Plugin):
-    name = u"lektor-shortcodes"
-    description = u"Shortcodes for Lektor."
+    name = "lektor-shortcodes"
+    description = "Shortcodes for Lektor."
 
     def on_process_template_context(self, context, **extra):
         if "shortcodes" not in self.env.jinja_env.filters:
@@ -88,10 +95,11 @@ class ShortcodesPlugin(Plugin):
 
     def on_markdown_config(self, config, **extra):
         shortcodes_config = self.get_config()
-        if not shortcodes_config.section_as_dict("global"):
-            return
         self.lexer = ShortcodeLexer(shortcodes_config, env=self.env.jinja_env)
         config.options["block"] = self.lexer
 
     def on_markdown_meta_init(self, meta, **extra):
-        self.lexer._current_context = {"this": extra["record"], "site": extra["record"].pad}
+        context = {"this": extra["record"]}
+        if extra["record"]:
+            context["site"] = extra["record"].pad
+        self.lexer._current_context = context
