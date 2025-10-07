@@ -1,0 +1,199 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lektor-shortcodes"
+version = "0.3.0"
+description = "The Lektor Shortcodes plugin allows you to use shortcodes (shortcodes are something like custom tags) in your fields (not templates), so your content doesn't have to have repetitive snippets over and over."
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Stavros Korokithakis", email = "hi@stavros.io"},
+]
+maintainers = [
+    {name = "Eric Ma", email = "ericmajinglong@gmail.com"},
+]
+keywords = ["lektor", "shortcodes"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Text Processing :: Markup",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "lektor>=3.0.0",
+    "jinja2>=3.0.0",
+    "mistune<2.0.0",  # Pin to 0.x for Lektor compatibility
+    "markupsafe>=2.0.0",
+    "werkzeug<3.0.0",  # Pin to 2.x for Lektor compatibility
+]
+
+[project.urls]
+Homepage = "https://github.com/skorokithakis/lektor-shortcodes"
+Repository = "https://github.com/skorokithakis/lektor-shortcodes"
+Issues = "https://github.com/skorokithakis/lektor-shortcodes/issues"
+
+[project.entry-points."lektor.plugins"]
+shortcodes = "lektor_shortcodes:ShortcodesPlugin"
+
+[tool.hatch.build.targets.wheel]
+packages = ["lektor_shortcodes"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/lektor_shortcodes",
+    "/README.md",
+    "/pyproject.toml",
+]
+
+[tool.ruff]
+target-version = "py38"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["lektor_shortcodes"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "mistune.*",
+    "lektor.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
+
+[tool.coverage.run]
+source = ["lektor_shortcodes"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+# Pixi configuration
+[tool.pixi.project]
+channels = ["https://prefix.dev/conda-forge", "pypi"]
+platforms = ["osx-64", "linux-64", "win-64"]
+
+[tool.pixi.dependencies]
+# Base dependencies (inherited by all environments)
+python = ">=3.8"
+
+[tool.pixi.feature.dev.dependencies]
+# Development dependencies
+pytest = ">=7.0.0"
+pytest-cov = ">=4.0.0"
+pytest-mock = ">=3.10.0"
+ruff = ">=0.1.0"
+mypy = ">=1.0.0"
+pre-commit = ">=3.0.0"
+hatch = ">=1.0.0"
+
+[tool.pixi.feature.test.dependencies]
+# Test-specific dependencies
+pytest = ">=7.0.0"
+pytest-cov = ">=4.0.0"
+pytest-mock = ">=3.10.0"
+
+[tool.pixi.environments.dev]
+features = ["dev"]
+
+[tool.pixi.environments.test]
+features = ["test"]
+
+
+[tool.pixi.tasks]
+# Development tasks
+lint = "ruff check ."
+lint-fix = "ruff check --fix ."
+type-check = "mypy lektor_shortcodes"
+test = "pytest"
+test-cov = "pytest --cov=lektor_shortcodes --cov-report=html --cov-report=term"
+format = "ruff format ."
+check = "ruff check . && mypy lektor_shortcodes && pytest"
+
+# Build tasks
+build = "hatch build"
+build-wheel = "hatch build --target wheel"
+build-sdist = "hatch build --target sdist"
+clean = "hatch clean"
+
+# Installation
+install = "pip install -e ."
+install-dev = "pip install -e .[dev]"
+
+[tool.pixi.tasks.pre-commit]
+cmd = "pre-commit run --all-files"
+
+[tool.pixi.tasks.ci]
+cmd = "ruff check . && mypy lektor_shortcodes && pytest --cov=lektor_shortcodes"

@@ -1,29 +1,29 @@
-# --------------------------------------------------------------------------
-# A library for parsing customizable Wordpress-style shortcodes.
-#
-# Author: Darren Mulholland <darren@mulholland.xyz>
-# License: Public Domain
-# --------------------------------------------------------------------------
+"""A library for parsing customizable WordPress-style shortcodes.
+
+Author: Darren Mulholland <darren@mulholland.xyz>
+License: Public Domain
+"""
 
 import re
-import sys
+from typing import Any, Callable, Dict, List, Optional
 
 # Library version number.
 __version__ = "2.4.0"
 
 
 # Globally registered shortcode handlers indexed by tag.
-globaltags = {}
+globaltags: Dict[str, Dict[str, Any]] = {}
 
 
 # Globally registered end-tags for block-scoped shortcodes.
-globalends = []
+globalends: List[str] = []
 
 
 # Decorator function for globally registering shortcode handlers.
-def register(tag, end_tag=None):
+def register(tag: str, end_tag: Optional[str] = None) -> Callable[[Callable], Callable]:
+    """Register a shortcode handler globally."""
 
-    def register_function(function):
+    def register_function(function: Callable) -> Callable:
         globaltags[tag] = {"func": function, "endtag": end_tag}
         if end_tag:
             globalends.append(end_tag)
@@ -33,16 +33,9 @@ def register(tag, end_tag=None):
 
 
 # Decode unicode escape sequences in a string.
-if sys.version_info < (3,):
-
-    def decode_escapes(s):
-        return bytes(s).decode("unicode_escape")
-
-
-else:
-
-    def decode_escapes(s):
-        return s.encode("latin-1").decode("unicode_escape")
+def decode_escapes(s: str) -> str:
+    """Decode unicode escape sequences in a string."""
+    return s.encode("latin-1").decode("unicode_escape")
 
 
 # --------------------------------------------------------------------------
@@ -77,7 +70,6 @@ class RenderingError(ShortcodeError):
 
 # Input text is parsed into a tree of Node instances.
 class Node:
-
     def __init__(self):
         self.children = []
 
@@ -87,7 +79,6 @@ class Node:
 
 # A Text node represents plain text located between shortcode tokens.
 class Text(Node):
-
     def __init__(self, text):
         self.text = text
 
@@ -99,7 +90,6 @@ class Text(Node):
 # inside quoted arguments are decoded; unquoted arguments are preserved in
 # their raw state.
 class Shortcode(Node):
-
     # Regex for parsing the shortcode's arguments.
     re_args = re.compile(
         r"""
@@ -142,7 +132,6 @@ class Shortcode(Node):
 
 # An atomic shortcode is a shortcode with no closing tag.
 class AtomicShortcode(Shortcode):
-
     # If the shortcode handler raises an exception we intercept it and wrap it
     # in a RenderingError. The original exception will still be available via
     # the RenderingError's __cause__ attribute.
@@ -150,13 +139,12 @@ class AtomicShortcode(Shortcode):
         try:
             return str(self.func(context, None, self.pargs, self.kwargs))
         except Exception as ex:
-            msg = "error rendering '%s' shortcode" % self.tag
-            raise RenderingError(msg)
+            msg = f"error rendering '{self.tag}' shortcode"
+            raise RenderingError(msg) from ex
 
 
 # A block-scoped shortcode is a shortcode with a closing tag.
 class BlockShortcode(Shortcode):
-
     # If the shortcode handler raises an exception we intercept it and wrap it
     # in a RenderingError. The original exception will still be available via
     # the RenderingError's __cause__ attribute.
@@ -165,8 +153,8 @@ class BlockShortcode(Shortcode):
         try:
             return str(self.func(context, content, self.pargs, self.kwargs))
         except Exception as ex:
-            msg = "error rendering '%s' shortcode" % self.tag
-            raise RenderingError(msg)
+            msg = f"error rendering '{self.tag}' shortcode"
+            raise RenderingError(msg) from ex
 
 
 # --------------------------------------------------------------------------
@@ -179,14 +167,15 @@ class BlockShortcode(Shortcode):
 # parse() method accepts an arbitrary context object which it passes on to
 # each shortcode's handler function.
 class Parser:
-
     def __init__(self, start="[%", end="%]", esc="\\"):
         self.start = start
         self.esc_start = esc + start
         self.len_start = len(start)
         self.len_end = len(end)
         self.len_esc = len(esc)
-        self.regex = re.compile(r"((?:%s)?%s.*?%s)" % (re.escape(esc), re.escape(start), re.escape(end)))
+        self.regex = re.compile(
+            rf"((?:{re.escape(esc)})?{re.escape(start)}.*?{re.escape(end)})"
+        )
         self.tags = {}
         self.ends = []
 
@@ -196,7 +185,6 @@ class Parser:
             self.ends.append(end_tag)
 
     def parse(self, text, context=None):
-
         # Local, merged copies of the global and parser tag registries.
         tags = globaltags.copy()
         tags.update(self.tags)
@@ -211,7 +199,7 @@ class Parser:
 
         # The stack of expected end-tags should finish empty.
         if expecting:
-            raise NestingError("expecting '%s'" % expecting[-1])
+            raise NestingError(f"expecting '{expecting[-1]}'")
 
         # Pop the root node and render it as a string.
         return stack.pop().render(context)
@@ -222,7 +210,6 @@ class Parser:
                 yield token
 
     def _parse_token(self, token, stack, expecting, tags, ends):
-
         # Do we have a shortcode token?
         if token.startswith(self.start):
             content = token[self.len_start : -self.len_end].strip()
@@ -238,7 +225,6 @@ class Parser:
             stack[-1].children.append(Text(token))
 
     def _parse_sc_token(self, content, stack, expecting, tags, ends):
-
         # Split the token's content into the tag and argument string.
         tag = content.split(None, 1)[0]
         argstring = content[len(tag) :]
@@ -246,13 +232,12 @@ class Parser:
         # Do we have a registered end-tag?
         if tag in ends:
             if not expecting:
-                raise NestingError("not expecting '%s'" % tag)
+                raise NestingError(f"not expecting '{tag}'")
             elif tag == expecting[-1]:
                 stack.pop()
                 expecting.pop()
             else:
-                msg = "expecting '%s', found '%s'"
-                raise NestingError(msg % (expecting[-1], tag))
+                raise NestingError(f"expecting '{expecting[-1]}', found '{tag}'")
 
         # Do we have a registered tag?
         elif tag in tags:
@@ -267,5 +252,4 @@ class Parser:
 
         # We have an unrecognised tag.
         else:
-            msg = "'%s' is not a recognised shortcode tag"
-            raise InvalidTagError(msg % tag)
+            raise InvalidTagError(f"'{tag}' is not a recognised shortcode tag")

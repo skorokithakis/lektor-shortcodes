@@ -34,11 +34,30 @@ Much easier, cleaner and less repetitive.
 Installation
 ------------
 
+### Using Lektor (Recommended)
+
 To install the plugin, just add `lektor-shortcodes` to your plugins from the
 command line:
 
 ~~~
 lektor plugins add lektor-shortcodes
+~~~
+
+### Using pip
+
+You can also install directly with pip:
+
+~~~
+pip install lektor-shortcodes
+~~~
+
+### Using pixi (Development)
+
+For development, you can use pixi to manage dependencies:
+
+~~~
+pixi install
+pixi run install-dev
 ~~~
 
 
@@ -90,6 +109,50 @@ the section named `main` (so it will include shortcodes in `main` unless you
 request a different section, and it will always include shortcodes in `global` no
 matter what).
 
+
+Development
+-----------
+
+This project uses modern Python tooling:
+
+- **pixi** for dependency management
+- **hatch** for building and packaging
+- **ruff** for linting and formatting
+- **mypy** for type checking
+- **pytest** for testing
+
+### Setup Development Environment
+
+```bash
+# Install pixi (if not already installed)
+curl -fsSL https://pixi.sh/install.sh | bash
+
+# Install dependencies
+pixi install
+
+# Run tests
+pixi run test
+
+# Run linting
+pixi run lint
+
+# Run type checking
+pixi run type-check
+
+# Format code
+pixi run format
+
+# Build package
+pixi run build
+```
+
+### Pre-commit Hooks
+
+Install pre-commit hooks for automatic code quality checks:
+
+```bash
+pixi run pre-commit
+```
 
 Miscellanea
 -----------
