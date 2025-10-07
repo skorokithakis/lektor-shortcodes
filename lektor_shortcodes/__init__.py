@@ -27,6 +27,7 @@ class ShortcodeLexer(BlockLexer):
         """Initialize the shortcode lexer rules."""
         self.rules.shortcode = re.compile(r"(\[% .+? %\])")
         self.default_rules.insert(1, "shortcode")
+        self._current_context = {}
 
     def _init_shortcodes_compiler(self, config: Any, env: Environment) -> None:
         """Initialize the shortcode compiler."""
@@ -37,7 +38,7 @@ class ShortcodeLexer(BlockLexer):
         text = match.group(1)
         self.tokens.append(
             {
-                "type": "close_html",
+                "type": "shortcode",
                 "text": self.compile(text, context=self._current_context),
             }
         )
@@ -121,15 +122,16 @@ class ShortcodesPlugin(Plugin):
                 self.get_config(), ctx=context, env=self.env.jinja_env
             )
 
-    def on_markdown_config(self, config: Any, **extra: Any) -> None:
-        """Configure markdown processing with shortcode lexer."""
-        shortcodes_config = self.get_config()
-        self.lexer = ShortcodeLexer(shortcodes_config, env=self.env.jinja_env)
-        config.options["block"] = self.lexer
-
     def on_markdown_meta_init(self, meta: Any, **extra: Any) -> None:
         """Initialize markdown metadata with context."""
         context = {"this": extra["record"]}
         if extra["record"]:
             context["site"] = extra["record"].pad
-        self.lexer._current_context = context
+
+        # Process shortcodes in the markdown source before markdown processing
+        if hasattr(meta, "source") and meta.source:
+            shortcodes_config = self.get_config()
+            shortcodes_func = shortcode_factory(
+                shortcodes_config, ctx=context, env=self.env.jinja_env
+            )
+            meta.source = shortcodes_func(meta.source)
