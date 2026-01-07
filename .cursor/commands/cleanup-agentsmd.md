@@ -1,1 +1,0 @@
-Deduplicate any knowledge within AGENTS.md.
