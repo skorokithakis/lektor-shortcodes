@@ -51,13 +51,12 @@ You can also install directly with pip:
 pip install lektor-shortcodes
 ~~~
 
-### Using pixi (Development)
+### Using uv (Development)
 
-For development, you can use pixi to manage dependencies:
+For development, you can use uv to manage dependencies:
 
 ~~~
-pixi install
-pixi run install-dev
+uv pip install -e .[dev]
 ~~~
 
 
@@ -115,7 +114,7 @@ Development
 
 This project uses modern Python tooling:
 
-- **pixi** for dependency management
+- **uv** for fast package management
 - **hatch** for building and packaging
 - **ruff** for linting and formatting
 - **mypy** for type checking
@@ -124,26 +123,30 @@ This project uses modern Python tooling:
 ### Setup Development Environment
 
 ```bash
-# Install pixi (if not already installed)
-curl -fsSL https://pixi.sh/install.sh | bash
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install dependencies
-pixi install
+# Create a virtual environment and install dependencies
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install development dependencies
+uv pip install -e .[dev]
 
 # Run tests
-pixi run test
+pytest
 
 # Run linting
-pixi run lint
+ruff check .
 
 # Run type checking
-pixi run type-check
+mypy lektor_shortcodes
 
 # Format code
-pixi run format
+ruff format .
 
 # Build package
-pixi run build
+hatch build
 ```
 
 ### Pre-commit Hooks
@@ -151,7 +154,8 @@ pixi run build
 Install pre-commit hooks for automatic code quality checks:
 
 ```bash
-pixi run pre-commit
+pre-commit install
+pre-commit run --all-files
 ```
 
 Miscellanea

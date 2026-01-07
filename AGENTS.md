@@ -1,16 +1,16 @@
 # AGENTS.md - Key Learnings from Lektor Shortcodes Modernization
 
 ## Project Overview
-Successfully modernized a legacy Lektor shortcodes package from setup.py/setup.cfg to modern pyproject.toml with pixi dependency management.
+Successfully modernized a legacy Lektor shortcodes package from setup.py/setup.cfg to modern pyproject.toml with uv dependency management.
 
 ## Key Learnings
 
-### 1. Pixi Configuration
-- **Channels**: Use `https://prefix.dev/conda-forge` as the conda-forge channel, not just `"conda-forge"`
-- **PyPI Dependencies**: Some packages (like Lektor) are not available via conda-forge and must be installed via PyPI
-- **PyProject.toml Integration**: Pixi can be configured entirely through `pyproject.toml` using `[tool.pixi.*]` sections
-- **Features and Environments**: Use `[tool.pixi.feature.*]` for feature definitions and `[tool.pixi.environments.*]` for environment configuration
-- **Runtime Dependencies**: Place runtime dependencies in `[project]` section, development dependencies in pixi features
+### 1. UV Package Management
+- **Fast Installation**: UV provides extremely fast package installation compared to pip
+- **PyPI Focus**: UV works directly with PyPI packages, eliminating conda/pip compatibility issues
+- **PyProject.toml Integration**: UV respects standard `[project]` and `[project.optional-dependencies]` sections
+- **Virtual Environments**: UV manages virtual environments efficiently with `uv venv`
+- **Runtime Dependencies**: Place runtime dependencies in `[project]` section, development dependencies in `[project.optional-dependencies]`
 
 ### 2. Modern Python Tooling
 - **Ruff**: Replaces flake8, isort, and black for linting and formatting
@@ -42,13 +42,13 @@ Successfully modernized a legacy Lektor shortcodes package from setup.py/setup.c
 
 ### 6. Documentation
 - **README Updates**: Include modern installation instructions
-- **Development Setup**: Document pixi usage and development workflow
+- **Development Setup**: Document uv usage and development workflow
 - **Pre-commit Setup**: Include pre-commit hook installation instructions
 
 ## Best Practices Established
 
 1. **Always test the full pipeline** (lint, type-check, test) after modernization
-2. **Use pixi for dependency management** instead of pip/conda directly
+2. **Use uv for dependency management** for fast, reliable Python package management
 3. **Pin dependency versions** when compatibility issues arise
 4. **Modernize incrementally** - don't try to update everything at once
 5. **Check GitHub issues** before assuming latest dependency versions work
@@ -57,7 +57,6 @@ Successfully modernized a legacy Lektor shortcodes package from setup.py/setup.c
 
 ## Common Pitfalls Avoided
 
-- Don't assume all packages are available via conda-forge
 - Don't skip compatibility testing with latest dependency versions
 - Don't forget to update CI/CD configurations
 - Don't ignore type checking in modern Python projects
@@ -69,23 +68,27 @@ Successfully modernized a legacy Lektor shortcodes package from setup.py/setup.c
 ## Tools and Commands
 
 ```bash
+# Set up virtual environment
+uv venv
+source .venv/bin/activate
+
 # Install dependencies
-pixi install
+uv pip install -e .[dev]
 
 # Run linting
-pixi run lint
+ruff check .
 
 # Run type checking
-pixi run type-check
+mypy lektor_shortcodes
 
 # Run tests
-pixi run test
+pytest
 
 # Build package
-pixi run build
+hatch build
 
 # Format code
-pixi run format
+ruff format .
 ```
 
 ## Future Considerations

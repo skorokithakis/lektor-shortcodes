@@ -1,8 +1,8 @@
 """Tests for the shortcodes functionality."""
 
 # Test the scodes module directly without importing the main package
-import sys
 import os
+import sys
 
 # Add the package root to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
