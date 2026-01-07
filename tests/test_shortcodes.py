@@ -54,3 +54,43 @@ def test_parse_shortcode_with_content():
     result = parser.parse("[% div class=highlight %]This is content[% enddiv %]")
     assert "class='highlight'" in result
     assert "This is content" in result
+
+
+def test_image_shortcode():
+    """Test the image shortcode with align, image, and caption parameters."""
+    parser = Parser()
+
+    def image_handler(context, content, pargs, kwargs):
+        align = kwargs.get("align", "")
+        image = kwargs.get("image", "")
+        caption = kwargs.get("caption", "")
+        link = kwargs.get("link", "")
+
+        html = f'<div class="align{align}">'
+        if link:
+            html += f'<a href="{link}">'
+        html += f'<img src="{image}">'
+        if link:
+            html += "</a>"
+        if caption:
+            html += f'<span class="caption">{caption}</span>'
+        html += "</div>"
+        return html
+
+    parser.register(image_handler, "image")
+
+    # Test with all parameters
+    result = parser.parse(
+        '[% image align=right image=test.jpg caption="A test image" link=large.jpg %]'
+    )
+    assert '<div class="alignright">' in result
+    assert '<img src="test.jpg">' in result
+    assert '<span class="caption">A test image</span>' in result
+    assert '<a href="large.jpg">' in result
+
+    # Test without caption and link
+    result_simple = parser.parse("[% image align=left image=simple.jpg %]")
+    assert '<div class="alignleft">' in result_simple
+    assert '<img src="simple.jpg">' in result_simple
+    assert "caption" not in result_simple
+    assert "<a" not in result_simple
