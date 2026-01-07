@@ -1,0 +1,11 @@
+_model: page
+---
+title: Test Page
+---
+body:
+
+This is a test page.
+
+[% test %]Hello from shortcode![% endtest %]
+
+[% image align=right image=test.jpg caption="A test image" %]

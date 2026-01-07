@@ -133,8 +133,14 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 # Install development dependencies
 uv pip install -e .[dev]
 
-# Run tests
+# Run all tests (unit + integration)
 pytest
+
+# Run only unit tests
+pytest tests/test_shortcodes.py
+
+# Run only integration tests
+pytest tests/test_lektor_integration.py -m integration
 
 # Run linting
 ruff check .
