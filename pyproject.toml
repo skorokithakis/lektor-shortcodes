@@ -31,11 +31,8 @@ classifiers = [
 ]
 requires-python = ">=3.9"
 dependencies = [
-    "lektor>=3.0.0",
     "jinja2>=3.0.0",
-    "mistune<2.0.0",  # Pin to 0.x for Lektor compatibility
     "markupsafe>=2.0.0",
-    "werkzeug<3.0.0",  # Pin to 2.x for Lektor compatibility
 ]
 
 [project.urls]
@@ -150,9 +147,15 @@ dev = [
     "mypy>=1.0.0",
     "pre-commit>=3.0.0",
     "hatch>=1.0.0",
+    "lektor>=3.0.0",
+    "mistune<2.0.0",  # Pin to 0.x for Lektor compatibility
+    "werkzeug<3.0.0",  # Pin to 2.x for Lektor compatibility
 ]
 test = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "pytest-mock>=3.10.0",
+    "lektor>=3.0.0",
+    "mistune<2.0.0",  # Pin to 0.x for Lektor compatibility
+    "werkzeug<3.0.0",  # Pin to 2.x for Lektor compatibility
 ]

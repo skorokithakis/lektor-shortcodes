@@ -11,6 +11,7 @@ Successfully modernized a legacy Lektor shortcodes package from setup.py/setup.c
 - **PyProject.toml Integration**: UV respects standard `[project]` and `[project.optional-dependencies]` sections
 - **Virtual Environments**: UV manages virtual environments efficiently with `uv venv`
 - **Runtime Dependencies**: Place runtime dependencies in `[project]` section, development dependencies in `[project.optional-dependencies]`
+- **Plugin Dependencies**: For Lektor plugins, keep Lektor as a dev/test dependency, not a runtime dependency. The plugin is installed in Lektor's environment, so Lektor doesn't need to be a dependency of the plugin itself.
 
 ### 2. Modern Python Tooling
 - **Ruff**: Replaces flake8, isort, and black for linting and formatting
