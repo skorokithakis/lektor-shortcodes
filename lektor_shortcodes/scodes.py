@@ -5,18 +5,18 @@ License: Public Domain
 """
 
 import re
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Optional
 
 # Library version number.
 __version__ = "2.4.0"
 
 
 # Globally registered shortcode handlers indexed by tag.
-globaltags: Dict[str, Dict[str, Any]] = {}
+globaltags: dict[str, dict[str, Any]] = {}
 
 
 # Globally registered end-tags for block-scoped shortcodes.
-globalends: List[str] = []
+globalends: list[str] = []
 
 
 # Decorator function for globally registering shortcode handlers.

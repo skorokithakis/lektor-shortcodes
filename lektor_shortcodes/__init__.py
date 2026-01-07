@@ -2,7 +2,7 @@
 
 import itertools
 import re
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 from jinja2 import Environment, Template
 from lektor.markdown import Markdown
@@ -47,7 +47,7 @@ class ShortcodeLexer(BlockLexer):
 def shortcode_factory(
     config: Any,
     *,
-    ctx: Optional[Dict[str, Any]] = None,
+    ctx: Optional[dict[str, Any]] = None,
     env: Optional[Environment] = None,
 ) -> Any:
     """
@@ -67,7 +67,7 @@ def shortcode_factory(
     def shortcodes(
         text: Union[str, Markdown, Markup],
         *,
-        context: Optional[Dict[str, Any]] = None,
+        context: Optional[dict[str, Any]] = None,
         **options: Any,
     ) -> Union[str, Markdown, Markup]:
         """Process shortcodes in the given text."""
@@ -87,7 +87,7 @@ def shortcode_factory(
             # Make a closure so the correct config object passes through.
             def handler_closure(cconf: str) -> Any:
                 def handler(
-                    context: Any, content: Any, pargs: Any, kwargs: Dict[str, Any]
+                    context: Any, content: Any, pargs: Any, kwargs: dict[str, Any]
                 ) -> str:
                     kwargs.update(ctx)
                     return template(cconf).render(kwargs)
@@ -114,7 +114,7 @@ class ShortcodesPlugin(Plugin):
     description = "Shortcodes for Lektor."
 
     def on_process_template_context(
-        self, context: Dict[str, Any], **extra: Any
+        self, context: dict[str, Any], **extra: Any
     ) -> None:
         """Add shortcodes filter to Jinja2 environment."""
         if "shortcodes" not in self.env.jinja_env.filters:
