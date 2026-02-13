@@ -148,7 +148,7 @@ dev = [
     "pre-commit>=3.0.0",
     "hatch>=1.0.0",
     "lektor>=3.0.0",
-    "mistune<2.0.0",  # Pin to 0.x for Lektor compatibility
+    "mistune<4.0.0",  # Pin to 0.x for Lektor compatibility
     "werkzeug<3.0.0",  # Pin to 2.x for Lektor compatibility
 ]
 test = [
@@ -156,6 +156,6 @@ test = [
     "pytest-cov>=4.0.0",
     "pytest-mock>=3.10.0",
     "lektor>=3.0.0",
-    "mistune<2.0.0",  # Pin to 0.x for Lektor compatibility
+    "mistune<4.0.0",  # Pin to 0.x for Lektor compatibility
     "werkzeug<3.0.0",  # Pin to 2.x for Lektor compatibility
 ]
